@@ -12,12 +12,28 @@ def write_images(model_path, subdir, fgvc_data_dir, images_nos, options):
     subdir_path = path.join(model_path, subdir)
     os.mkdir(subdir_path)
 
+    if options.crop:
+        # read box information
+        box_info = {}
+        with open(path.join(fgvc_data_dir, 'images_box.txt')) as ibf:
+            for line in ibf:
+                result = line.split()
+                img_no, coords = result[0], map(int, result[1:])
+                box_info[img_no] = coords
+
     for image_no in images_nos:
         image_file = '%s.%s' % (image_no, FGVC_IMAGE_SUFFIX)
         img = Image(path.join(fgvc_data_dir, 'images', image_file))
 
-        # remove out banner
-        img_cropped = img.crop(0, 0, img.width, img.height-FGVC_BANNER_HEIGHT)
+        if options.crop:
+            # although FGVC pages says the orgin is (1,1)
+            # still there's some coordinates in box have 0 value
+            # so don't do adjustment - 1px difference should be OK
+            x1, y1, x2, y2 = box_info[image_no]
+            img_cropped = img.crop(x1, y1, x2, y2)
+        else:
+            # remove out banner
+            img_cropped = img.crop(0, 0, img.width, img.height-FGVC_BANNER_HEIGHT)
         img_cropped.save(path.join(subdir_path, image_file))
 
 def select_models(spec, options):
@@ -40,7 +56,7 @@ def select_models(spec, options):
 
     normalize_model_name = lambda n: n.strip().lower().replace(' ', '-')
     for model, image_nos in model_images.iteritems():
-        print 'Processing %s images ...' % model.strip()
+        print 'Processing [%s] images ...' % model.strip()
         model = normalize_model_name(model)
 
         model_path = path.join(output_dir, model)
@@ -69,6 +85,7 @@ if __name__ == '__main__':
     parser = OptionParser(usage=usage)
     parser.add_option('-p', '--portion', dest='test_portion', type='float', default=0.2, help='portion of examples used for test, (0, 1)')
     parser.add_option('-m', '--maximum', dest='maximum', type='int', default=0, help='maximum number of samples to use for each model')
+    parser.add_option('-c', '--crop', dest='crop', action='store_true', default=False, help='crop images to FGVC boxes')
     options, args = parser.parse_args()
 
     if options.test_portion <= 0 or options.test_portion >= 1:
