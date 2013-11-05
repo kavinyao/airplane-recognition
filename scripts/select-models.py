@@ -8,6 +8,8 @@ from optparse import OptionParser, OptionValueError
 FGVC_IMAGE_SUFFIX = 'jpg'
 FGVC_BANNER_HEIGHT = 20
 
+NORMALIZED_WIDTH = 500
+
 def write_images(model_path, subdir, fgvc_data_dir, images_nos, options):
     subdir_path = path.join(model_path, subdir)
     os.mkdir(subdir_path)
@@ -30,11 +32,17 @@ def write_images(model_path, subdir, fgvc_data_dir, images_nos, options):
             # still there's some coordinates in box have 0 value
             # so don't do adjustment - 1px difference should be OK
             x1, y1, x2, y2 = box_info[image_no]
-            img_cropped = img.crop(x1, y1, x2, y2)
+            img = img.crop(x1, y1, x2, y2)
         else:
             # remove out banner
-            img_cropped = img.crop(0, 0, img.width, img.height-FGVC_BANNER_HEIGHT)
-        img_cropped.save(path.join(subdir_path, image_file))
+            img = img.crop(0, 0, img.width, img.height-FGVC_BANNER_HEIGHT)
+
+        if options.grayscale:
+            img = img.grayscale()
+
+        # normalize to width
+        img = img.resize(NORMALIZED_WIDTH, int(img.height*1.0*NORMALIZED_WIDTH/img.width))
+        img.save(path.join(subdir_path, image_file))
 
 def select_models(spec, options):
     model_file, fgvc_data_dir, output_dir = spec
@@ -86,6 +94,7 @@ if __name__ == '__main__':
     parser.add_option('-p', '--portion', dest='test_portion', type='float', default=0.2, help='portion of examples used for test, (0, 1)')
     parser.add_option('-m', '--maximum', dest='maximum', type='int', default=0, help='maximum number of samples to use for each model')
     parser.add_option('-c', '--crop', dest='crop', action='store_true', default=False, help='crop images to FGVC boxes')
+    parser.add_option('-g', '--grayscale', dest='grayscale', action='store_true', default=False, help='remove color information')
     options, args = parser.parse_args()
 
     if options.test_portion <= 0 or options.test_portion >= 1:
