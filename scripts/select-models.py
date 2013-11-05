@@ -46,6 +46,9 @@ def select_models(spec, options):
         model_path = path.join(output_dir, model)
         os.mkdir(model_path)
 
+        if options.maximum > 0:
+            image_nos = random.sample(image_nos, options.maximum)
+
         random.shuffle(image_nos)
         test_number = int(len(image_nos) * options.test_portion)
 
@@ -64,7 +67,8 @@ if __name__ == '__main__':
             'WARNING: all contents of <output_dir> will be wiped out so DO NOT put any content there.'
 
     parser = OptionParser(usage=usage)
-    parser.add_option('-p', '--portion', dest='test_portion', type="float", default=0.2, help='portion of examples used for test, (0, 1)')
+    parser.add_option('-p', '--portion', dest='test_portion', type='float', default=0.2, help='portion of examples used for test, (0, 1)')
+    parser.add_option('-m', '--maximum', dest='maximum', type='int', default=0, help='maximum number of samples to use for each model')
     options, args = parser.parse_args()
 
     if options.test_portion <= 0 or options.test_portion >= 1:
