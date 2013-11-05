@@ -28,7 +28,7 @@ def select_models(spec, options):
     os.mkdir(output_dir)
 
     # use set for querying performance
-    models = set(m for m in open(model_file))
+    models = set(m for m in open(model_file) if not m.startswith('#'))
 
     model_images = defaultdict(list)
     model_image_file = path.join(fgvc_data_dir, 'images_family_trainval.txt')
