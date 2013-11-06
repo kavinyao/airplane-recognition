@@ -19,7 +19,8 @@ svm_properties = {
 svm = cv.SVMClassifier(extractors, svm_properties)
 
 data_dir = 'data'
-classes = os.listdir(data_dir)
+# dammit, .DS_Store
+classes = [subdir for subdir in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, subdir))]
 
 train_paths = [os.path.join(data_dir, c, 'train') for c in classes]
 test_paths = [os.path.join(data_dir, c, 'test') for c in classes]
