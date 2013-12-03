@@ -2,17 +2,21 @@ import numpy as np
 from SimpleCV import Image
 from sklearn.cluster import KMeans
 
-def reduce_color_space(img, N=8):
+def reduce_color_space(img, N=8, fast=False):
     """Reduce color space to N colors using k-means.
     Note: assume RGB space.
     @param img instance of Image
+    @param fast trade in accuracy for performance
     @return new Image
     """
     img_data = img.getNumpy()
     width, height, _ = img_data.shape
-    colors = img_data.reshape(width*height, 3)
+    if width == img.size()[1]:
+        # strange, it's rotated (column-based)
+        img_data = img_data.swapaxes(0, 1)
+    colors = img_data.reshape(width*height, 3).astype('float')
     # get centroid colors
-    kmeans = KMeans(n_clusters=N, n_init=1)
+    kmeans = KMeans(n_clusters=N, n_init=1 if fast else 3)
     kmeans.fit(colors)
     centroid_colors = kmeans.cluster_centers_.astype('uint8')
     assignments = kmeans.predict(colors)
