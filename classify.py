@@ -44,7 +44,10 @@ def run_cross_validation(config):
     # get images of each class
     image_sets = []
     for cls in classes:
-        images = [Image(img_file) for img_file in glob(os.path.join(data_dir, cls, '*.jpg'))]
+        if config.double_depth:
+            images = [Image(img_file) for img_file in glob(os.path.join(data_dir, cls, '*/*.jpg'))]
+        else:
+            images = [Image(img_file) for img_file in glob(os.path.join(data_dir, cls, '*.jpg'))]
         print '--loaded %d images of %s' % (len(images), cls)
         random.shuffle(images)
         image_sets.append(images)
@@ -73,10 +76,14 @@ def run_cross_validation(config):
             train_sets.append(train_set)
             test_sets.append(test_set)
 
+        # gather accuracy
         train_result = svm.train(train_sets, classes, verbose=False)
         train_accuracy.append(train_result[0])
+        print '----train accuracy: %.2f%%' % train_result[0]
         test_result = svm.test(test_sets, classes, verbose=False)
         test_accuracy.append(test_result[0])
+        print '----test accuracy: %.2f%%' % test_result[0]
+
         results.append([train_result, test_result])
 
     print '\nReporting...'
@@ -98,6 +105,7 @@ if __name__ == '__main__':
     parser.add_argument('data_dir', metavar='<image data directory>')
     parser.add_argument('output', metavar='[output file name]', nargs='?')
     parser.add_argument('-k', type=int, default=5, help='rounds of cross validation')
+    parser.add_argument('-d', '--double-depth', action='store_true', default=False, help='use if the data are in sub directories')
     parser.add_argument('-hue', '--use-hue-histogram', action='store_true', default=False, help='use hue histogram features')
     parser.add_argument('-edge', '--use-edge-histogram', action='store_true', default=False, help='use edge histogram features')
     parser.add_argument('-basic', '--use-basic-grid', action='store_true', default=False, help='use basic grid features')
