@@ -7,7 +7,7 @@ from SimpleCV import Image
 
 """Generate 600 negative images examles for Haar feature training."""
 
-N = 600
+N = 200
 MAX_WIDTH = 800
 
 def generate_negative_examples(argv):
@@ -17,7 +17,9 @@ def generate_negative_examples(argv):
     for image_dir in image_dirs:
         # grab all images
         images.extend(glob(path.join(image_dir, '*.jpg')))
+        images.extend(glob(path.join(image_dir, '*.JPG')))
         images.extend(glob(path.join(image_dir, '*.png')))
+        images.extend(glob(path.join(image_dir, '*.PNG')))
 
     images = set(images)
 
