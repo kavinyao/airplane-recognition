@@ -11,10 +11,7 @@ FGVC_BANNER_HEIGHT = 20
 
 NORMALIZED_WIDTH = 300
 
-def write_images(model_path, subdir, fgvc_data_dir, images_nos, options):
-    subdir_path = path.join(model_path, subdir)
-    os.mkdir(subdir_path)
-
+def write_images(model_path, fgvc_data_dir, images_nos, options):
     if options.crop:
         # read box information
         box_info = {}
@@ -46,7 +43,7 @@ def write_images(model_path, subdir, fgvc_data_dir, images_nos, options):
 
         # normalize to width
         img = img.resize(NORMALIZED_WIDTH, int(img.height*1.0*NORMALIZED_WIDTH/img.width))
-        img.save(path.join(subdir_path, image_file))
+        img.save(path.join(model_path, image_file))
 
 def select_models(spec, options):
     model_file, fgvc_data_dir, output_dir = spec
@@ -77,13 +74,9 @@ def select_models(spec, options):
         if options.maximum > 0:
             image_nos = random.sample(image_nos, options.maximum)
 
-        random.shuffle(image_nos)
-        test_number = int(len(image_nos) * options.test_portion)
+        write_images(model_path, fgvc_data_dir, image_nos, options)
 
-        write_images(model_path, 'test', fgvc_data_dir, image_nos[:test_number], options)
-        write_images(model_path, 'train', fgvc_data_dir, image_nos[test_number:], options)
-
-        print '--Finished. (train: %d, test: %d)' % (len(image_nos)-test_number, test_number)
+        print '--Finished. (total: %d)' % len(image_nos)
 
 
 if __name__ == '__main__':
@@ -95,15 +88,11 @@ if __name__ == '__main__':
             'WARNING: all contents of <output_dir> will be wiped out so DO NOT put any content there.'
 
     parser = OptionParser(usage=usage)
-    parser.add_option('-p', '--portion', dest='test_portion', type='float', default=0.2, help='portion of examples used for test, (0, 1)')
     parser.add_option('-m', '--maximum', dest='maximum', type='int', default=0, help='maximum number of samples to use for each model')
     parser.add_option('-c', '--crop', dest='crop', action='store_true', default=False, help='crop images to FGVC boxes')
     parser.add_option('-g', '--grayscale', dest='grayscale', action='store_true', default=False, help='remove color information')
     parser.add_option('-r', '--reduce-color-space', dest='reduce_color_space', action='store_true', default=False, help='reduce color space to specified number of colors')
     options, args = parser.parse_args()
-
-    if options.test_portion <= 0 or options.test_portion >= 1:
-        parser.error('Portion of example should be in (0, 1)')
 
     if len(args) != 3:
         parser.error('Incorrect number of arguments.')
