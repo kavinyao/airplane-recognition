@@ -86,7 +86,7 @@ def run_cross_validation(config):
     output = config.output if config.output else 'output-%d' % int(time.time())
     out_file = '%s.json' % output
     with open(out_file, 'wb') as out:
-        data = {'config': config, 'results': results}
+        data = {'config': vars(config), 'results': results}
         json.dump(data, out)
 
     print '--result of each round is saved to %s' % out_file
