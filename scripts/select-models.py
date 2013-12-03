@@ -4,11 +4,12 @@ from os import path
 from SimpleCV import Image
 from collections import defaultdict
 from optparse import OptionParser, OptionValueError
+from reduce_color_space import reduce_color_space
 
 FGVC_IMAGE_SUFFIX = 'jpg'
 FGVC_BANNER_HEIGHT = 20
 
-NORMALIZED_WIDTH = 500
+NORMALIZED_WIDTH = 300
 
 def write_images(model_path, subdir, fgvc_data_dir, images_nos, options):
     subdir_path = path.join(model_path, subdir)
@@ -36,6 +37,9 @@ def write_images(model_path, subdir, fgvc_data_dir, images_nos, options):
         else:
             # remove out banner
             img = img.crop(0, 0, img.width, img.height-FGVC_BANNER_HEIGHT)
+
+        if options.reduce_color_space:
+            img = reduce_color_space(img, fast=True)
 
         if options.grayscale:
             img = img.grayscale()
@@ -95,6 +99,7 @@ if __name__ == '__main__':
     parser.add_option('-m', '--maximum', dest='maximum', type='int', default=0, help='maximum number of samples to use for each model')
     parser.add_option('-c', '--crop', dest='crop', action='store_true', default=False, help='crop images to FGVC boxes')
     parser.add_option('-g', '--grayscale', dest='grayscale', action='store_true', default=False, help='remove color information')
+    parser.add_option('-r', '--reduce-color-space', dest='reduce_color_space', action='store_true', default=False, help='reduce color space to specified number of colors')
     options, args = parser.parse_args()
 
     if options.test_portion <= 0 or options.test_portion >= 1:
