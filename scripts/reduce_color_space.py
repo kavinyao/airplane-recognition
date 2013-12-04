@@ -1,5 +1,5 @@
 import numpy as np
-from SimpleCV import Image
+from SimpleCV.ImageClass import Image
 from sklearn.cluster import KMeans
 
 def reduce_color_space(img, N=8, fast=False):

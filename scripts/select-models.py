@@ -1,7 +1,7 @@
 import os
 import random
 from os import path
-from SimpleCV import Image
+from SimpleCV.ImageClass import Image
 from collections import defaultdict
 from optparse import OptionParser, OptionValueError
 from reduce_color_space import reduce_color_space
