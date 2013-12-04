@@ -11,6 +11,16 @@ from feature_extractors import BasicFeatureByGridExtractor
 def average(numbers):
     return 1.0 * sum(numbers) / len(numbers)
 
+def dump_features(label, image, extractors, out_file):
+    features = []
+    for extractor in extractors:
+        feats = extractor.extract(image)
+        if feats:
+            features.extend(feats)
+
+    feat_string = ' '.join(['%d:%.6f' % (i, feat) for i, feat in enumerate(features, 1)])
+    out_file.write('%d %s\n' % (label, feat_string))
+
 def run_cross_validation(config):
     print 'Preparing...'
     # configure extractors to use
@@ -51,6 +61,30 @@ def run_cross_validation(config):
         print '--loaded %d images of %s' % (len(images), cls)
         random.shuffle(images)
         image_sets.append(images)
+
+    if config.dump_file:
+        print '\nDumping examples...'
+        # dump example features instead of running CV
+        train_file = open('%s.train' % config.dump_file, 'w')
+        test_file = open('%s.test' % config.dump_file, 'w')
+
+        for i in range(len(classes)):
+            num_images = len(image_sets[i])
+            split_point = int(num_images * config.dump_ratio)
+
+            for j in range(num_images):
+                image = image_sets[i][j]
+                if j < split_point:
+                    dump_features(i, image, extractors, train_file)
+                else:
+                    dump_features(i, image, extractors, test_file)
+
+        train_file.close()
+        test_file.close()
+        print '--training examples written to %s' % train_file.name
+        print '--testing examples written to %s' % test_file.name
+
+        return
 
     print '\nCross Validating...'
     # start k-fold cross validation
@@ -106,6 +140,8 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='[output file name]', nargs='?')
     parser.add_argument('-k', type=int, default=5, help='rounds of cross validation')
     parser.add_argument('-d', '--double-depth', action='store_true', default=False, help='use if the data are in sub directories')
+    parser.add_argument('--dump-file', help='dump example label and feature vector for SVM parameter tuning')
+    parser.add_argument('--dump-ratio', type=float, default=0.8, help='the ratio of examples for training')
     parser.add_argument('-hue', '--use-hue-histogram', action='store_true', default=False, help='use hue histogram features')
     parser.add_argument('-edge', '--use-edge-histogram', action='store_true', default=False, help='use edge histogram features')
     parser.add_argument('-basic', '--use-basic-grid', action='store_true', default=False, help='use basic grid features')
