@@ -1,0 +1,23 @@
+# Orientation
+# use basic features only (E(accuracy) ~= 72.7%)
+python classify.py -basic -so orientation-classifier.pickle -C 0.5 -g 0.5 -d data-orientation/
+# use edge features only (E(accuracy) ~=  42.0%)
+python classify.py -basic -so orientation-classifier.pickle -C 8192.0 -g 0.0078125 -d data-orientation/
+# use basic and edge features (E(accuracy) ~= 72.0%)
+python classify.py -basic -so orientation-classifier.pickle -C 512.0 -g 0.0078125 -d data-orientation/
+
+
+# Model Recognition
+# cross validation with basic features only (E(accuracy) ~= 39%)
+python classify -basic -C 2.0 -g 0.5 data/
+(E(accuracy) ~= 38%)
+python classify -basic -C 128.0 -g 0.03125 data/
+
+# cross validation with edge features only (E(accuracy) ~= 23%)
+python classify -edge -C 8.0 -g 0.125 data/
+
+# cross validation with basic and edge features (E(accuracy) ~= 37.8%)
+python classify -basic -edge -C 512 -g 0.0078125 data/
+
+# cross validation with basic ege and hue features (E(accuracy) ~= 27%)
+python classify -basic -edge -hue -C 2048 -g 0.001953125 data/
