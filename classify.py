@@ -85,6 +85,25 @@ def run_cross_validation(config):
 
         return
 
+    if config.save_orientation_classifier:
+        print '\nTraining orientation classifier...'
+        train_sets, test_sets = [], []
+        for image_set in image_sets:
+            n = len(image_set)
+            split_point = int(n * 0.8)
+            train_sets.append(image_set[:split_point])
+            test_sets.append(image_set[split_point:])
+
+        svm = SVMClassifier(extractors, svm_properties)
+        train_result = svm.train(train_sets, classes, verbose=False)
+        print '--train accuracy: %.2f%%' % train_result[0]
+        test_result = svm.test(test_sets, classes, verbose=False)
+        print '--test accuracy: %.2f%%' % test_result[0]
+
+        svm.save(config.save_orientation_classifier)
+        print '--orientation classifier saved to 5%s' % config.save_orientation_classifier
+        return
+
     print '\nCross Validating...'
     # start k-fold cross validation
     k = config.k
@@ -141,7 +160,7 @@ if __name__ == '__main__':
     parser.add_argument('-k', type=int, default=5, help='rounds of cross validation')
     parser.add_argument('-d', '--double-depth', action='store_true', default=False, help='use if the data are in sub directories')
     # SVM parameters
-    parser.add_argument('-C', type=int, default=1, help='parameter C for C-SVM')
+    parser.add_argument('-C', type=float, default=1.0, help='parameter C for C-SVM')
     parser.add_argument('-g', '--gamma', type=float, default=None, help='parameter gamma for C-SVM')
     # for SVM parameter tuning
     parser.add_argument('--dump-file', help='dump example label and feature vector for SVM parameter tuning')
@@ -150,6 +169,9 @@ if __name__ == '__main__':
     parser.add_argument('-hue', '--use-hue-histogram', action='store_true', default=False, help='use hue histogram features')
     parser.add_argument('-edge', '--use-edge-histogram', action='store_true', default=False, help='use edge histogram features')
     parser.add_argument('-basic', '--use-basic-grid', action='store_true', default=False, help='use basic grid features')
+    # orientation detection
+    parser.add_argument('-so', '--save-orientation-classifier', help='file name of serialized orientation classifier')
+    parser.add_argument('-lo', '--load-orientation-classifier', help='file name of serialized orientation classifier')
 
     args = parser.parse_args()
     print args
