@@ -104,6 +104,20 @@ def run_cross_validation(config):
         print '--orientation classifier saved to 5%s' % config.save_orientation_classifier
         return
 
+    if config.load_orientation_classifier:
+        orientation_classifier = SVMClassifier.load(config.load_orientation_classifier)
+        print '--loaded orientation classifier'
+        print '--flipping images where the aircraft is predicted to face right'
+
+        flip_count = 0
+        for image_set in image_sets:
+            for i in range(len(image_set)):
+                if orientation_classifier.classify(image_set[i]) == 'to-right':
+                    image_set[i] = image_set[i].flipHorizontal()
+                    flip_count += 1
+
+        print '--%d images flipped' % flip_count
+
     print '\nCross Validating...'
     # start k-fold cross validation
     k = config.k
