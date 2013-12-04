@@ -145,7 +145,7 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--gamma', type=float, default=None, help='parameter gamma for C-SVM')
     # for SVM parameter tuning
     parser.add_argument('--dump-file', help='dump example label and feature vector for SVM parameter tuning')
-    parser.add_argument('--dump-ratio', type=float, default=0.8, help='the ratio of examples for training')
+    parser.add_argument('--dump-ratio', type=float, default=1, help='the ratio of examples for training')
     # feature extractors
     parser.add_argument('-hue', '--use-hue-histogram', action='store_true', default=False, help='use hue histogram features')
     parser.add_argument('-edge', '--use-edge-histogram', action='store_true', default=False, help='use edge histogram features')
