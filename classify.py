@@ -36,15 +36,14 @@ def run_cross_validation(config):
         print '--loaded BasicFeatureByGridExtractor'
 
     # config
-    # TODO
     svm_properties = {
-        'KernelType':'RBF', #default is a RBF Kernel
-        'SVMType':'NU',     #default is C
-        'nu':0.05,          # NU for SVM NU
-        'c':None,           #C for SVM C - the slack variable
-        'degree':None,      #degree for poly kernels - defaults to 3
-        'coef':None,        #coef for Poly/Sigmoid defaults to 0
-        'gamma':None,       #kernel param for poly/rbf/sigma - default is 1/#samples
+        'KernelType': 'RBF',
+        'SVMType': 'C',
+        'c': config.C, #C for SVM C - the slack variable
+        'gamma': config.gamma, #kernel param for poly/rbf/sigma - default is 1/#samples
+        'nu': None,
+        'coef': None,
+        'degree': None,
     }
 
     data_dir = config.data_dir
@@ -136,12 +135,18 @@ if __name__ == '__main__':
     from argparse import ArgumentParser, ArgumentError
 
     parser = ArgumentParser(description='Run k-fold cross validation on aircraft classification')
+    # input/output
     parser.add_argument('data_dir', metavar='<image data directory>')
     parser.add_argument('output', metavar='[output file name]', nargs='?')
     parser.add_argument('-k', type=int, default=5, help='rounds of cross validation')
     parser.add_argument('-d', '--double-depth', action='store_true', default=False, help='use if the data are in sub directories')
+    # SVM parameters
+    parser.add_argument('-C', type=int, default=1, help='parameter C for C-SVM')
+    parser.add_argument('-g', '--gamma', type=float, default=None, help='parameter gamma for C-SVM')
+    # for SVM parameter tuning
     parser.add_argument('--dump-file', help='dump example label and feature vector for SVM parameter tuning')
     parser.add_argument('--dump-ratio', type=float, default=0.8, help='the ratio of examples for training')
+    # feature extractors
     parser.add_argument('-hue', '--use-hue-histogram', action='store_true', default=False, help='use hue histogram features')
     parser.add_argument('-edge', '--use-edge-histogram', action='store_true', default=False, help='use edge histogram features')
     parser.add_argument('-basic', '--use-basic-grid', action='store_true', default=False, help='use basic grid features')
