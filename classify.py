@@ -32,7 +32,7 @@ def run_cross_validation(config):
         extractors.append(EdgeHistogramFeatureExtractor())
         print '--loaded EdgeHistogramFeatureExtractor'
     if config.use_basic_grid:
-        extractors.append(BasicFeatureByGridExtractor())
+        extractors.append(BasicFeatureByGridExtractor(grid_size=config.grid_size))
         print '--loaded BasicFeatureByGridExtractor'
 
     # config
@@ -183,6 +183,7 @@ if __name__ == '__main__':
     parser.add_argument('-hue', '--use-hue-histogram', action='store_true', default=False, help='use hue histogram features')
     parser.add_argument('-edge', '--use-edge-histogram', action='store_true', default=False, help='use edge histogram features')
     parser.add_argument('-basic', '--use-basic-grid', action='store_true', default=False, help='use basic grid features')
+    parser.add_argument('-gs', '--grid-size', type=int, default=3, help='set grid size to nxn')
     # orientation detection
     parser.add_argument('-so', '--save-orientation-classifier', help='file name of serialized orientation classifier')
     parser.add_argument('-lo', '--load-orientation-classifier', help='file name of serialized orientation classifier')
